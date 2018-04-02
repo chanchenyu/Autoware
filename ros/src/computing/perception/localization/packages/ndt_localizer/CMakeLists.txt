@@ -108,6 +108,10 @@ target_link_libraries(lazy_ndt_mapping ${catkin_LIBRARIES})
 target_link_libraries(queue_counter ${catkin_LIBRARIES})
 add_dependencies(lazy_ndt_mapping autoware_msgs_generate_messages_cpp)
 
+if(CUDA_FOUND)
+  target_include_directories(approximate_ndt_mapping PRIVATE ${CUDA_INCLUDE_DIRS})
+endif()
+
 if ("${ROS_VERSION}" MATCHES "(indigo|jade)")
   #add_executable(ndt_matching_tku nodes/ndt_matching_tku/ndt_matching_tku.cpp nodes/ndt_matching_tku/newton.cpp nodes/ndt_matching_tku/algebra.cpp)
   add_executable(ndt_matching_tku nodes/ndt_matching_tku/ndt_matching_tku.cpp)

@@ -641,6 +641,9 @@ subs :
          desc : waypoint_velocity_visualizer desc sample
          cmd  : roslaunch waypoint_maker waypoint_velocity_visualizer.launch
          param: waypoint_velocity_visualizer
+       - name : waypoint_converter
+         desc : waypoint_converter desc sample
+         cmd  : rosrun waypoint_maker waypoint_converter  
     - name : waypoint_follower
       desc : waypoint_follower desc sample
       subs :
@@ -677,6 +680,13 @@ subs :
              flags : [ nl ]
            position_error :
              flags : [ nl ]
+  - name : MPC_path_follower
+    desc : MPC_path_follower desc sample
+    subs :
+    - name : MPC_path_follower
+      desc : MPC_path_follower desc sample
+      cmd  : roslaunch path_follower path_follower.launch
+      param: MPC_path_follower
 
   - name : Decision
     desc : decision groups

@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   vector_map
   lane_planner
   autoware_msgs
+  path_follower_msgs
 )
 
 find_package(Boost REQUIRED)
@@ -59,3 +60,11 @@ add_executable(waypoint_velocity_visualizer nodes/waypoint_velocity_visualizer/w
 target_link_libraries(waypoint_velocity_visualizer ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(waypoint_velocity_visualizer
   autoware_msgs_generate_messages_cpp)
+  
+add_executable(waypoint_converter nodes/waypoint_converter/waypoint_converter.cpp)
+target_link_libraries(waypoint_converter ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_dependencies(waypoint_converter
+  autoware_msgs_generate_messages_cpp
+  path_follower_msgs_generate_messages_cpp)
+  
+  

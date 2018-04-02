@@ -1,0 +1,236 @@
+#!/usr/bin/env python
+
+import rospy
+from numpy import zeros, array, append, eye, diag
+from math import sqrt
+from tf import transformations
+from ekf import ekf
+from sensor_msgs.msg import Imu
+from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped, Pose2D, Quaternion
+from path_follower_msgs.msg import state_Dynamic
+from dbw_mkz_msgs.msg import SteeringReport
+from system_models import f_PointMass, h_PointMass_withGPS, h_PointMass_withoutGPS
+
+# measurement
+Vx_meas         = 0
+Yaw_meas        = 0
+IMU_time        = 0
+Yaw_meas_prev   = 0
+IMU_time_prev   = 0 
+Yawrate_meas    = 0
+pose_initialize = 0
+X_meas          = 0
+Y_meas          = 0
+
+ax_meas         = 0
+ay_meas         = 0
+
+relative_quaternion = zeros((1,4))
+quaternion          = (0,0,0,0)
+quaternion_prev     = (0,0,0,0)
+gnss_read            = 0
+ndt_read            = 0
+Yaw_initialize      = 0
+#GPS_initialize      = 0
+IMU_start           = 0
+
+# Tra_1
+#start_X = 558640.93
+#start_Y = 4196656.64
+
+# Tra_2
+#start_X = 558641.09
+#start_Y = 4196656.20
+
+start_X = 0
+start_Y = 0
+
+pub_flag = 0
+
+def SteeringReportCallback(data):
+  global Vx_meas
+  Vx_meas = data.speed
+
+def RelativeOrientationCallback(data):
+  global relative_quaternion
+  global Yaw_initialize
+  relative_quaternion = (data.x,data.y,data.z,data.w)
+  Yaw_initialize = 1
+
+def CurrentPose2DCallback(data):
+  global Yaw_meas, X_meas, Y_meas
+  global gnss_read, pose_initialize
+  
+  if pose_initialize == 0:
+    start_X = data.x
+    start_Y = data.y  
+  
+  Yaw_meas = data.theta
+  X_meas = data.x
+  Y_meas = data.y
+  gnss_read = 1
+  pose_initialize = 1
+  
+def CurrentPoseCallback(data):
+  global Yaw_meas, X_meas, Y_meas
+  global ndt_read, pose_initialize  
+  global relative_quaternion
+  global Yaw_initialize  
+  
+  if pose_initialize == 0:
+    start_X = data.pose.position.x
+    start_Y = data.pose.position.y  
+  
+  relative_quaternion = (data.pose.orientation.x,data.pose.orientation.y,data.pose.orientation.z,data.pose.orientation.w)
+  Yaw_initialize = 1
+  
+  euler = transformations.euler_from_quaternion(quaternion)
+  Yaw_meas = euler[2]  
+
+  X_meas = data.pose.position.x
+  Y_meas = data.pose.position.y
+  
+  ndt_read = 1
+  pose_initialize = 1  
+
+def IMUCallback(data):
+  global Yaw_meas, Yaw_meas_prev, Yawrate_meas
+  global IMU_time, IMU_time_prev
+  global Yaw_initialize, IMU_start
+  global ax_meas, ay_meas
+  global quaternion_prev, quaternion
+
+  ori        = data.orientation
+  quaternion = (ori.x, ori.y, ori.z, ori.w)
+
+  if Yaw_initialize == 0:
+    (roll, pitch, Yaw_meas)      = transformations.euler_from_quaternion(quaternion)
+  else:
+    actual_quaternion            = transformations.quaternion_multiply(quaternion,relative_quaternion)
+    (roll, pitch, Yaw_meas)      = transformations.euler_from_quaternion(actual_quaternion)
+    (roll, pitch, Yaw_meas_prev) = transformations.euler_from_quaternion(transformations.quaternion_multiply(quaternion_prev, relative_quaternion))
+
+  IMU_time = float(str(data.header.stamp))
+
+  if IMU_start == 0:
+    IMU_start    = 1
+  else:
+    Yawrate_meas = (Yaw_meas-Yaw_meas_prev)/(IMU_time-IMU_time_prev)
+
+
+  Yaw_meas_prev    = Yaw_meas
+  quaternion_prev  = quaternion
+  IMU_time_prev    = IMU_time
+
+  ax_meas          = data.linear_acceleration.x
+  ay_meas          = data.linear_acceleration.y
+
+
+
+
+def state_estimation():
+    global Vx_meas, Yaw_meas, X_meas, Y_meas
+    global Yaw_initialize, pose_initialize, gnss_read, ndt_read
+    global start_X, start_Y, pub_flag
+
+    # initialize node
+    rospy.init_node('state_estimation', anonymous=True)
+
+    # topic subscriptions / publications
+    rospy.Subscriber('imu/raw', Imu, IMUCallback)
+    rospy.Subscriber('vehicle/steering_report', SteeringReport, SteeringReportCallback)
+    # read pose from ndt_pose
+    rospy.Subscriber('current_pose', PoseStamped, CurrentPoseCallback)
+    # read pose from gnss_pose
+    rospy.Subscriber('current_pose_2D', Pose2D, CurrentPose2DCallback)
+    rospy.Subscriber('relative_quaternion', Quaternion , RelativeOrientationCallback)
+    
+    state_pub = rospy.Publisher('state_estimate', state_Dynamic, queue_size = 10)
+
+
+    # set node rate
+    loop_rate = 100
+    dt        = 1.0 / loop_rate
+    rate      = rospy.Rate(loop_rate)
+
+    # estimation variables for Luemberger observer
+    z_EKF            = array([0.,0.,0.,0.,0.])
+    z_EKF_prev       = array([0.,0.,0.,0.,0.])
+    states_est       = array([0.,0.,0.,0.,0.])
+    state_initialize = 0
+    state_est_obj    = state_Dynamic()
+
+    # estimation variables for EKF
+    var_gps   = 1.0e-06
+    var_v     = 1.0e-04
+    var_psi   = 1.0e-06
+
+    var_ax    = 1.0e-04
+    var_ay    = 1.0e-04
+    var_wz    = 1.0e-04
+    var_noise = 1.0e-04
+
+    P         = eye(5)    # initial dynamics coveriance matrix
+    Q         = diag(array([var_ax, var_ay, var_wz, var_noise, var_noise]))     # process noise coveriance matrix
+    R2         = diag(array([var_v, var_gps, var_gps, var_psi]))     # measurement noise coveriance matrix
+    R1         = diag(array([var_v, var_psi]))
+
+    while (rospy.is_shutdown() != 1):
+
+        #print((Yaw_initialize, GPS_initialize))
+
+      if Yaw_initialize == 0 or pose_initialize == 0:
+            print("not initialized")
+            print(Yaw_initialize)
+            print(pose_initialize)
+            rate.sleep()
+            continue
+
+      elif state_initialize == 0:
+        z_EKF            = array([Vx_meas, 0, X_meas, Y_meas, Yaw_meas])
+        state_est        = z_EKF
+        state_est        = append(state_est,Yawrate_meas)
+        state_initialize = 1
+
+      else:
+        u_ekf      = array([ax_meas, ay_meas, Yawrate_meas])
+        w_ekf      = array([0., 0., 0., 0., 0.])
+        args       = (u_ekf, dt)
+        z_EKF_prev = z_EKF
+
+        if gnss_read == 0 or ndt_read == 0:
+          y_ekf      = array([Vx_meas, Yaw_meas])
+          v_ekf      = array([0.,0.])
+          (z_EKF, P) = ekf(f_PointMass, z_EKF, w_ekf, v_ekf, P, h_PointMass_withoutGPS, y_ekf, Q, R1, args)
+        else:
+          y_ekf      = array([Vx_meas, X_meas, Y_meas, Yaw_meas])
+          v_ekf      = array([0.,0.,0.,0.])
+
+          (z_EKF, P) = ekf(f_PointMass, z_EKF, w_ekf, v_ekf, P, h_PointMass_withGPS, y_ekf, Q, R2, args)
+          gnss_read   = 0
+          ndt_read    = 0
+        
+        state_est = z_EKF
+        state_est = append(state_est,(z_EKF[4] - z_EKF_prev[4])/dt) 
+
+      print(z_EKF)
+      state_est_obj.vx = state_est[0]
+      state_est_obj.vy = state_est[1]
+      state_est_obj.X  = state_est[2]
+      state_est_obj.Y  = state_est[3]
+      state_est_obj.psi= state_est[4]
+      state_est_obj.wz = state_est[5]
+      if sqrt((state_est[2]-start_X)**2+(state_est[3]-start_Y)**2)<0.5:
+        print('start')
+        pub_flag = 1
+      if pub_flag == 1:
+        state_pub.publish(state_est_obj)  
+      rate.sleep()
+
+
+
+if __name__ == '__main__':
+  try:
+    state_estimation()
+  except rospy.ROSInterruptException:
+    pass
