@@ -179,6 +179,13 @@ subs :
         desc : yolo2_wa desc sample
         cmd  : roslaunch cv_tracker yolo2.launch
         param: yolo2
+        gui   :
+          flags : [ need_camera_info ]
+          sel_cam_dialog_only : [ camera_id ]
+          sel_cam_dialog_allow: [ camera_id ]
+          camera_id :
+            border : 16
+            flags : [ all ]
 
       - name : range_fusion
         desc : range_fusion desc sample
@@ -3329,6 +3336,14 @@ params :
       cmd_param :
         dash      : ''
         delim     : ':='
+    - name      : use_gpu
+      desc      : Use GPU to accelerate computation
+      label     : Use GPU
+      kind      : checkbox
+      v         : False
+      cmd_param :
+        dash      : ''
+        delim     : ':='     
 
   - name  : car_fusion
     topic : /config/car_fusion
@@ -3545,7 +3560,70 @@ params :
         dash         : ''
         delim        : ':='
         only_enable  : True
-
+  - name  : yolo2
+    topic : /config/ssd
+    msg   : ConfigSsd
+    vars  :
+    - name  : score_threshold
+      desc  : score_threshold desc sample
+      label : Score Threshold
+      min   : 0.0
+      max   : 1.0
+      v     : 0.6
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name      : image_src
+      desc      : Image Topic to be fed to the network for detection
+      label     : image_src
+      kind      : str
+      v         : /image_raw
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name     : network_definition_file
+      desc     : Prototxt file which defines the network
+      label    : 'network_file (yolo2)'
+      kind     : path
+      v        : ~/darknet/cfg/yolo.cfg
+      cmd_param:
+        dash     : ''
+        delim    : ':='
+    - name     : pretrained_model_file
+      desc     : Trained Caffe model
+      label    : 'pattern_file (yolo2)'
+      kind     : path
+      v        : ~/darknet/data/yolo.weights
+      cmd_param:
+        dash     : ''
+        delim    : ':='
+    - name      : use_gpu
+      desc      : use_gpu desc sample
+      label     : use_gpu
+      kind     : checkbox
+      v        : True
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name      : gpu_device_id
+      desc      : gpu_device_id desc sample
+      label     : gpu_device_id
+      min       : 0
+      max       : 10
+      v         : 0
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name         : camera_id
+      desc         : camera_id desc sample
+      kind         : menu
+      label        : Camera ID
+      choices_type : str
+      v            : ''
+      cmd_param    :
+        dash         : ''
+        delim        : ':='
+        only_enable  : True
   - name : viewer_sel_cam
     vars :
     - name         : camera_id
