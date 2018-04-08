@@ -64,7 +64,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
  # /home/luciawen/Desktop/control_ws/src/path_follower/nodes/MPC_LQR/QPsolver/
-  /home/dev/Autoware/ros/src/computing/planning/motion/packages/path_follower/nodes/MPC_LQR/QPsolver/
+  ${CMAKE_CURRENT_SOURCE_DIR}/nodes/MPC_LQR/QPsolver/
 )
 #include_directories(
 #  /home/luciawen/qpOASES-3.2.1/include
