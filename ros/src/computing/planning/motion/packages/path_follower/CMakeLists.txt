@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(path_follower)
 
-
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
@@ -11,6 +10,7 @@ project(path_follower)
 find_package(catkin REQUIRED COMPONENTS
   roscpp 
   rospy
+  dynamic_reconfigure
   std_msgs
   geometry_msgs
   sensor_msgs 
@@ -37,6 +37,21 @@ find_package(catkin REQUIRED COMPONENTS
 ## Declare ROS dynamic reconfigure parameters ##
 ################################################
 
+## To declare and build dynamic reconfigure parameters within this
+## package, follow these steps:
+## * In the file package.xml:
+##   * add a build_depend and a run_depend tag for "dynamic_reconfigure"
+## * In this file (CMakeLists.txt):
+##   * add "dynamic_reconfigure" to
+##     find_package(catkin REQUIRED COMPONENTS ...)
+##   * uncomment the "generate_dynamic_reconfigure_options" section below
+##     and list every .cfg file to be processed
+
+## Generate dynamic reconfigure parameters in the 'cfg' folder
+ generate_dynamic_reconfigure_options(
+   cfg/DynamicParam.cfg
+ )
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -60,28 +75,10 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
- # /home/luciawen/Desktop/control_ws/src/path_follower/nodes/MPC_LQR/QPsolver/
-  ${CMAKE_CURRENT_SOURCE_DIR}/nodes/MPC_LQR/QPsolver/
+  ${CMAKE_CURRENT_SOURCE_DIR}/nodes/MPC/QPsolver/
 )
-#include_directories(
-#  /home/luciawen/qpOASES-3.2.1/include
-#)
-
-#link_directories(
-#  /home/luciawen/qpOASES-3.2.1/bin
-#)
-#include_directories(
-#  /home/luciawen/qpOASES-3.2.1/
-#)
-
-## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/path_follower.cpp
-# )
-
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -96,35 +93,28 @@ add_executable(cmd_converter_node nodes/cmd_converter/cmd_converter_node.cpp)
 add_executable(pose_estimation nodes/pose_estimation/pose_estimation.cpp)
 add_executable(nmea_to_UTM nodes/nmea_to_UTM/nmea2pose_core.cpp nodes/nmea_to_UTM/nmea2pose_core.h nodes/nmea_to_UTM/nmea2pose_node.cpp nodes/nmea_to_UTM/latlongtoUTM.h nodes/nmea_to_UTM/latlongtoUTM.cpp)
 
-#add_executable(MPC_LQR nodes/MPC_LQR/LQR-ForDebug.cpp nodes/MPC_LQR/Vehicle.cpp nodes/MPC_LQR/scaledTime.cpp 
-#add_executable(MPC_LQR nodes/MPC_LQR/MPC_qpOASES.cpp nodes/MPC_LQR/Vehicle.cpp nodes/MPC_LQR/scaledTime.cpp 
-#add_executable(MPC_LQR nodes/MPC_LQR/MPC_qpOASES-ForDebug.cpp nodes/MPC_LQR/Vehicle.cpp nodes/MPC_LQR/scaledTime.cpp 
-#add_executable(MPC_LQR nodes/MPC_LQR/Test.cpp nodes/MPC_LQR/Vehicle.cpp nodes/MPC_LQR/scaledTime.cpp
-#add_executable(MPC_LQR nodes/MPC_LQR/MPC-qp-pps.cpp nodes/MPC_LQR/Vehicle.cpp nodes/MPC_LQR/scaledTime.cpp
-#add_executable(MPC_LQR nodes/MPC_LQR/Test.cpp 
-
-add_executable(MPC_LQR 
-  nodes/MPC_LQR/MPC-qp-pps.cpp 
-  nodes/MPC_LQR/Vehicle.cpp 
-  nodes/MPC_LQR/scaledTime.cpp  
-  nodes/MPC_LQR/QPsolver/src/QProblem.cpp
-  nodes/MPC_LQR/QPsolver/src/QProblemB.cpp
-  nodes/MPC_LQR/QPsolver/src/BLASReplacement.cpp
-  nodes/MPC_LQR/QPsolver/src/Bounds.cpp
-  nodes/MPC_LQR/QPsolver/src/Constraints.cpp
-  nodes/MPC_LQR/QPsolver/src/Flipper.cpp
-  nodes/MPC_LQR/QPsolver/src/Indexlist.cpp
-  nodes/MPC_LQR/QPsolver/src/LAPACKReplacement.cpp
-  nodes/MPC_LQR/QPsolver/src/Matrices.cpp
-  nodes/MPC_LQR/QPsolver/src/MessageHandling.cpp
-  nodes/MPC_LQR/QPsolver/src/Options.cpp
-  nodes/MPC_LQR/QPsolver/src/OQPinterface.cpp
-  nodes/MPC_LQR/QPsolver/src/SolutionAnalysis.cpp
-  nodes/MPC_LQR/QPsolver/src/SparseSolver.cpp
-  nodes/MPC_LQR/QPsolver/src/SQProblem.cpp
-  nodes/MPC_LQR/QPsolver/src/SQProblemSchur.cpp
-  nodes/MPC_LQR/QPsolver/src/SubjectTo.cpp
-  nodes/MPC_LQR/QPsolver/src/Utils.cpp
+add_executable(MPC 
+  nodes/MPC/MPC.cpp 
+  nodes/MPC/Vehicle.cpp 
+  nodes/MPC/scaledTime.cpp  
+  nodes/MPC/QPsolver/src/QProblem.cpp
+  nodes/MPC/QPsolver/src/QProblemB.cpp
+  nodes/MPC/QPsolver/src/BLASReplacement.cpp
+  nodes/MPC/QPsolver/src/Bounds.cpp
+  nodes/MPC/QPsolver/src/Constraints.cpp
+  nodes/MPC/QPsolver/src/Flipper.cpp
+  nodes/MPC/QPsolver/src/Indexlist.cpp
+  nodes/MPC/QPsolver/src/LAPACKReplacement.cpp
+  nodes/MPC/QPsolver/src/Matrices.cpp
+  nodes/MPC/QPsolver/src/MessageHandling.cpp
+  nodes/MPC/QPsolver/src/Options.cpp
+  nodes/MPC/QPsolver/src/OQPinterface.cpp
+  nodes/MPC/QPsolver/src/SolutionAnalysis.cpp
+  nodes/MPC/QPsolver/src/SparseSolver.cpp
+  nodes/MPC/QPsolver/src/SQProblem.cpp
+  nodes/MPC/QPsolver/src/SQProblemSchur.cpp
+  nodes/MPC/QPsolver/src/SubjectTo.cpp
+  nodes/MPC/QPsolver/src/Utils.cpp
   )
 
 ## Rename C++ executable without prefix
@@ -139,7 +129,7 @@ add_executable(MPC_LQR
 add_dependencies(cmd_converter_node path_follower_msgs_generate_messages_cpp) 
 add_dependencies(pose_estimation path_follower_msgs_generate_messages_cpp) 
 add_dependencies(nmea_to_UTM path_follower_msgs_generate_messages_cpp) 
-add_dependencies(MPC_LQR path_follower_msgs_generate_messages_cpp)
+add_dependencies(MPC path_follower_msgs_generate_messages_cpp path_follower_gencfg)
 
 
 ## Specify libraries to link a library or executable target against
@@ -156,9 +146,8 @@ target_link_libraries(pose_estimation
 target_link_libraries(nmea_to_UTM
  ${catkin_LIBRARIES}
 )
-target_link_libraries(MPC_LQR
+target_link_libraries(MPC
  ${catkin_LIBRARIES} 
-# qpOASES
 )
 
 
@@ -178,7 +167,7 @@ target_link_libraries(MPC_LQR
 install(PROGRAMS
   nodes/state_estimation/ekf.py
   nodes/state_estimation/system_models.py
-  nodes/state_estimation/state_estimation_DynBicycle.py
+  nodes/state_estimation/state_estimation.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
