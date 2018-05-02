@@ -19,6 +19,12 @@ subs :
         param: gnss
         gui  :
           stat_topic : [ gnss ]
+      - name : utm2tfpose
+        desc : utm2tfpose desc sample
+        cmd  : roslaunch gnss_localizer utm2tfpose.launch
+        param: gnss
+        gui  :
+          stat_topic : [ gnss ]
     - name : ndt_localizer
       desc : ndt_localizer desc sample
       subs :

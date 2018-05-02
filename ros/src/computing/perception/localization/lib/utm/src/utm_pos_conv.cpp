@@ -1,5 +1,7 @@
 #include <utm_pos_conv.hh>
-
+#include <iostream>
+#include <boost/algorithm/string.hpp>
+#include <algorithm>
 using std::string;
 using std::cout;
 using std::endl;
@@ -142,13 +144,13 @@ void utm_pos_conv::conv_llh2xyz(void)
   
   double A = a/(1+n) * (1 + 1/4*n2 + 1/64*n4 + 1/256*n6); // 2 * pi * A is the circumference of a meridian
   
-  double alpha = [ null, // note alpha is one-based array (6th order Kruger expressions)
+  double alpha[7] = { 0, // note alpha is one-based array (6th order Kruger expressions)
                    1/2*n - 2/3*n2 + 5/16*n3 +   41/180*n4 -     127/288*n5 +      7891/37800*n6,
                          13/48*n2 -  3/5*n3 + 557/1440*n4 +     281/630*n5 - 1983433/1935360*n6,
                                   61/240*n3 -  103/140*n4 + 15061/26880*n5 +   167603/181440*n6,
                                           49561/161280*n4 -     179/168*n5 + 6601661/7257600*n6,
                                                             34729/80640*n5 - 3418889/1995840*n6,
-                                                                         212378941/319334400*n6 ];
+                                                                         212378941/319334400*n6 };
   double psi = psi_prime;
   
   for (size_t j=1; j<=6; j++) psi += alpha[j] * sin(2*j*psi_prime) * cosh(2*j*ita_prime);

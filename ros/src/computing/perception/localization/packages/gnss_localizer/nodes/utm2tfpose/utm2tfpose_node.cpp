@@ -31,7 +31,7 @@
 // ROS includes
 #include <ros/ros.h>
 
-#include "nmea2tfpose_core.h"
+#include "utm2tfpose_core.h"
 
 int main(int argc, char **argv)
 {

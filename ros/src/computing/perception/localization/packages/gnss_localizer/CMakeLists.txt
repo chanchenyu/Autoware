@@ -17,8 +17,7 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES lane_follower
   CATKIN_DEPENDS roscpp std_msgs nmea_msgs tf
-  DEPENDS gnss
-  DEPENDS utm
+  DEPENDS gnss utm
 )
 
 ###########
@@ -41,4 +40,4 @@ add_executable(nmea2tfpose nodes/nmea2tfpose/nmea2tfpose_core.cpp nodes/nmea2tfp
 target_link_libraries(nmea2tfpose ${catkin_LIBRARIES})
 
 add_executable(utm2tfpose nodes/utm2tfpose/utm2tfpose_core.cpp nodes/utm2tfpose/utm2tfpose_node.cpp)
-target_link_libraries(nmea2tfpose ${catkin_LIBRARIES})
+target_link_libraries(utm2tfpose ${catkin_LIBRARIES})
