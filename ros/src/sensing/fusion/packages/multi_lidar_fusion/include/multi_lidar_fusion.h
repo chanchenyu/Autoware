@@ -71,6 +71,15 @@ class RosMultiLidarFusionApp
   std::string                         parent_frame_;
   std::string                         child_frame1_;
   std::string                         child_frame2_;
+  
+  std::string                         localizer_fl_;
+  Eigen::Matrix4f                     tf_fltol_;
+  std::string                         localizer_fr_;
+  Eigen::Matrix4f                     tf_frtol_;
+  
+  double fl_tf_x_, fl_tf_y_, fl_tf_z_, fl_tf_roll_, fl_tf_pitch_, fl_tf_yaw_;
+  double fr_tf_x_, fr_tf_y_, fr_tf_z_, fr_tf_roll_, fr_tf_pitch_, fr_tf_yaw_;
+  
 
   typedef
   message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2,  

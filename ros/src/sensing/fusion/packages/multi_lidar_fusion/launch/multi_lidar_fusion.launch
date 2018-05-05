@@ -2,11 +2,39 @@
     <arg name="points_parent_src" default="/lidar0/points_raw" />
     <arg name="points_child_src1" default="/lidar1/points_raw" />
     <arg name="points_child_src2" default="/lidar2/points_raw" />
-    
-    <node pkg="multi_lidar_fusion" type="multi_lidar_fusion" name="lidar_fuser" output="log">
+    <arg name="localizer_fl" default="velodyne_fl" />
+    <arg name="fl_tf_x" default="0.960457" />
+    <arg name="fl_tf_y" default="-0.280691" />
+    <arg name="fl_tf_z" default="0.00677087" />
+    <arg name="fl_tf_roll" default="3.12494" />
+    <arg name="fl_tf_pitch" default="-3.12518" />
+    <arg name="fl_tf_yaw" default="3.13387" />
+    <arg name="localizer_fr" default="velodyne_fr" />
+    <arg name="fr_tf_x" default="0.0122072" />
+    <arg name="fr_tf_y" default="-0.628534" />
+    <arg name="fr_tf_z" default="0.000169907" />
+    <arg name="fr_tf_roll" default="3.07482" />
+    <arg name="fr_tf_pitch" default="-3.14072" />
+    <arg name="fr_tf_yaw" default="3.13788" />
+                     
+    <node pkg="multi_lidar_fusion" type="multi_lidar_fusion" name="lidar_fuser" output="screen">
         <param name="points_parent_src" value="$(arg points_parent_src)" />
         <param name="points_child_src1" value="$(arg points_child_src1)" />
         <param name="points_child_src2" value="$(arg points_child_src2)" />
+        <param name="localizer_fl" value="$(arg localizer_fl)" />
+        <param name="fl_tf_x" value="$(arg fl_tf_x)" />
+        <param name="fl_tf_y" value="$(arg fl_tf_y)" />
+        <param name="fl_tf_z" value="$(arg fl_tf_z)" />
+        <param name="fl_tf_roll" value="$(arg fl_tf_roll)" />
+        <param name="fl_tf_pitch" value="$(arg fl_tf_pitch)" />
+        <param name="fl_tf_yaw" value="$(arg fl_tf_yaw)" />
+        <param name="localizer_fr" value="$(arg localizer_fr)" />
+        <param name="fr_tf_x" value="$(arg fr_tf_x)" />
+        <param name="fr_tf_y" value="$(arg fr_tf_y)" />
+        <param name="fr_tf_z" value="$(arg fr_tf_z)" />
+        <param name="fr_tf_roll" value="$(arg fr_tf_roll)" />
+        <param name="fr_tf_pitch" value="$(arg fr_tf_pitch)" />
+        <param name="fr_tf_yaw" value="$(arg fr_tf_yaw)" />
     </node>
 
 </launch>
