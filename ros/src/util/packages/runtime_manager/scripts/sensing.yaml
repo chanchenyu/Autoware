@@ -180,6 +180,36 @@ subs :
           calibration :
             prop  : 0
             flags : [ center_v ]
+      - name : Velodyne VLP-16-Front-left
+        desc : Launches the driver for the selected Velodyne sensor and publishes the pointcloud in points_raw. To select a custom calibration file press the [config] button.
+        probe:
+        run  : roslaunch velodyne_pointcloud velodyne_vlp16_fl.launch
+        param: calibration_path
+        gui  :
+          flags : [ SIGTERM, kill_children ]
+          calibration :
+            prop  : 0
+            flags : [ center_v ]      
+      - name : Velodyne VLP-16-Front-right
+        desc : Launches the driver for the selected Velodyne sensor and publishes the pointcloud in points_raw. To select a custom calibration file press the [config] button.
+        probe:
+        run  : roslaunch velodyne_pointcloud velodyne_vlp16_fr.launch
+        param: calibration_path
+        gui  :
+          flags : [ SIGTERM, kill_children ]
+          calibration :
+            prop  : 0
+            flags : [ center_v ] 
+      - name : Velodyne VLP-16-Rear-center
+        desc : Launches the driver for the selected Velodyne sensor and publishes the pointcloud in points_raw. To select a custom calibration file press the [config] button.
+        probe:
+        run  : roslaunch velodyne_pointcloud velodyne_vlp16_rc.launch
+        param: calibration_path
+        gui  :
+          flags : [ SIGTERM, kill_children ]
+          calibration :
+            prop  : 0
+            flags : [ center_v ]      
       - name : Velodyne VLP-16 Hi-Res
         desc : Launches the driver for the selected Velodyne sensor and publishes the pointcloud in points_raw. To select a custom calibration file press the [config] button.
         probe:
@@ -284,6 +314,11 @@ cmds:
       desc : Performs extrinsic calibration between two point clouds
       cmd  : roslaunch multi_lidar_calibrator multi_lidar_calibrator.launch
       param: multi_lidar_calibrator
+      
+    - name : multi_lidar_fusion
+      desc : Performs fusions of three point clouds
+      cmd  : roslaunch multi_lidar_fusion multi_lidar_fusion.launch
+      param: multi_lidar_fusion  
       
 buttons:
   calibration_toolkit :
