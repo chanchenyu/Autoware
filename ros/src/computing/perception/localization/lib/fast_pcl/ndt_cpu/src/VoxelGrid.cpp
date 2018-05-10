@@ -81,8 +81,13 @@ void VoxelGrid<PointSourceType>::initialize()
 	points_id_.reset();
 	points_id_ = boost::make_shared<std::vector<std::vector<int> > >(voxel_num_);
 
+<<<<<<< HEAD
 	points_per_voxel_.reset();
 	points_per_voxel_ = boost::make_shared<std::vector<int> >(voxel_num_, 0);
+=======
+	points_id_.clear();
+	points_id_.resize(voxel_num_);
+>>>>>>> d0969fb2b73d4035b609f77d08f309d58e34a08e
 
 	tmp_centroid_.reset();
 	tmp_centroid_ = boost::make_shared<std::vector<Eigen::Vector3d> >(voxel_num_);
@@ -273,9 +278,14 @@ void VoxelGrid<PointSourceType>::computeCentroidAndCovariance()
 
 				Eigen::Matrix3d covariance;
 
+<<<<<<< HEAD
 				if (ipoint_num >= min_points_per_voxel_) {
 					covariance = ((*tmp_cov_)[i] - 2.0 * (pt_sum * (*centroid_)[i].transpose())) / point_num + (*centroid_)[i] * (*centroid_)[i].transpose();
 					covariance *= (point_num - 1.0) / point_num;
+=======
+			covariance_[i] = (covariance_[i] - 2.0 * (pt_sum * centroid_[i].transpose())) / point_num + centroid_[i] * centroid_[i].transpose();
+			covariance_[i] *= (point_num - 1.0) / point_num;
+>>>>>>> d0969fb2b73d4035b609f77d08f309d58e34a08e
 
 					SymmetricEigensolver3x3 sv(covariance);
 
