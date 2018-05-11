@@ -1,0 +1,21 @@
+state_estimation.py
+* variables changed to allign with the convention in Autoware
+* GPS_initialize -> pose_initialize
+* GPS_read -> gnss_read
+* Is "pub_flag" still used?
+MPC.h
+* replace message header path_follower to path_follower_msgs
+* replace #include <path_follower/Time.h> to #include <path_follower_msgs/MpcTime.h>
+* remove #include <path_follower_msgs/TwistStamped.h>
+* remove #include <path_follower_msgs/SteeringCmd.h>
+MPC.cpp
+* replace message header path_follower to path_follower_msgs
+* replace path_follower::SteeringCmd to dbw_mkz_msgs::SteeringCmd
+* replace path_follower::Time to path_follower_msgs::MpcTime
+Messages
+* all messages are moved to path_follower_msgs/msg
+* Time.msg -> MpcTime.msg
+* remove path_follower_msgs/TwistStamped
+* remove path_follower_msgs/SteeringCmd
+
+
