@@ -74,6 +74,11 @@ subs :
             flags : [ nl ]
           sync :
             func : self.button_synchronization.GetValue()
+      - name : ndt_matching_monitor
+        desc : Monitors NDT localizer. Halts or resets localization if algorithm fails. Works better with GNSS.
+        cmd  : roslaunch ndt_localizer ndt_matching_monitor.launch
+        param: ndt_matching_monitor
+
     - name : icp_localizer
       subs :
       - name : icp_matching
@@ -192,6 +197,11 @@ subs :
           camera_id :
             border : 16
             flags : [ all ]
+
+      - name : yolo3_wa
+        desc : Yolo3 Image based detector
+        cmd  : roslaunch yolo3_detector yolo3.launch
+        param: yolo3
 
       - name : range_fusion
         desc : range_fusion desc sample
@@ -365,6 +375,18 @@ subs :
         desc : region_tlr desc sample
         cmd  : roslaunch road_wizard traffic_light_recognition.launch
         param: region_tlr
+        gui  :
+          flags : [ need_camera_info ]
+          sel_cam_dialog_only : [ camera_id ]
+          sel_cam_dialog_allow: [ camera_id ]
+          camera_id :
+            border : 16
+            flags : [ all ]
+
+      - name : region_tlr_mxnet
+        desc : region_tlr_mxnet desc sample
+        cmd  : roslaunch road_wizard traffic_light_recognition_mxnet.launch
+        param: region_tlr_mxnet
         gui  :
           flags : [ need_camera_info ]
           sel_cam_dialog_only : [ camera_id ]
@@ -693,6 +715,7 @@ subs :
              flags : [ nl ]
            position_error :
              flags : [ nl ]
+<<<<<<< HEAD
   - name : MPC_path_follower
     desc : MPC_path_follower desc sample
     subs :
@@ -700,6 +723,10 @@ subs :
       desc : MPC_path_follower desc sample
       cmd  : roslaunch path_follower path_follower.launch
       param: MPC_path_follower
+=======
+           use_ctrl_cmd :
+             flags : [ nl ]
+>>>>>>> 37b76fce43ae4c19ef2133beab914ca1b1b1e859
 
   - name : Decision
     desc : decision groups
@@ -2074,6 +2101,14 @@ params :
       cmd_param :
         dash        : ''
         delim       : ':='
+    - name     : use_ctrl_cmd
+      desc     : use_ctrl_cmd
+      label    : use_ctrl_cmd
+      kind     : checkbox
+      v        : False
+      cmd_param:
+        dash     : ''
+        delim    : ':='
 
   - name  : planner_selector
     topic : /config/PlannerSelector
@@ -2449,6 +2484,62 @@ params :
         dash         : ''
         delim        : ':='
         only_enable  : True
+
+  - name : region_tlr_mxnet
+    topic: /config/superimpose
+    msg  : Bool
+    vars :
+    - name  : data
+      desc  : data desc sample
+      label : Display superimpose result
+      kind  : checkbox
+      v     : False
+    - name      : score_threshold
+      desc      : score threshold for a positive label
+      label     : score_threshold
+      min       : 0
+      max       : 1.0
+      v         : 0.8
+      cmd_param:
+        dash     : ''
+        delim    : ':='
+    - name      : change_state_threshold
+      desc      : state change threshold
+      label     : change_state_threshold
+      min       : 0
+      max       : 100
+      v         : 2
+      cmd_param:
+        dash     : ''
+        delim    : ':='
+    - name         : camera_id
+      desc         : camera_id desc sample
+      kind         : menu
+      label        : Camera ID
+      choices_type : str
+      v            : ''
+      cmd_param    :
+        dash         : ''
+        delim        : ':='
+        only_enable  : True
+    - name      : network_definition_file
+      desc      : network_definition json file
+      label     : network_definition json file
+      kind      : path
+      path_type : multi
+      v         : /tmp/network_definition.json
+      cmd_param :
+        dash        : ''
+        delim       : ':='
+    - name      : pretrained_model_file
+      desc      : pretrained_model params file
+      label     : pretrained_model params file
+      kind      : path
+      path_type : multi
+      v         : /tmp/network_definition.params
+      cmd_param :
+        dash        : ''
+        delim       : ':='
 
   - name : region_tlr_ssd
     vars :
@@ -3984,3 +4075,178 @@ params :
       cmd_param :
         dash      : ''
         delim     : ':='
+
+
+  - name : ndt_matching_monitor
+    vars :
+    - name      : iteration_threshold_warn
+      desc      : Number of maximum iterations before notifying a warning. Default 10
+      label     : iteration_threshold_warn
+      min       : 1
+      max       : 32
+      v         : 10
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name      : iteration_threshold_stop
+      desc      : Number of maximum iterations before using GNSS or stopping the localziation. Default 32
+      label     : iteration_threshold_stop
+      min       : 1
+      max       : 32
+      v         : 32
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name      : score_threshold_delta
+      desc      : Difference between consecutive scores to consider a safe match. Default 14.0
+      label     : score_threshold_delta
+      min       : 0.0
+      max       : 100.0
+      v         : 14.0
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name      : min_stable_samples
+      desc      : Minimum number of samples to start monitoring after a reset. Default 30
+      label     : min_stable_samples
+      min       : 5
+      max       : 100
+      v         : 30
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name      : fatal_time_threshold
+      desc      : When no GNSS is available a prediction based on the previous samples will be employed. If reinitialization fails the algorithm will stop after n secs. Default 2
+      label     : fatal_time_threshold
+      min       : 0.1
+      max       : 5.0
+      v         : 2.0
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+
+  - name  : yolo2
+    vars  :
+    - name  : score_threshold
+      desc  : Detections with a confidence value larger than this value will be displayed.
+      label : Score Threshold
+      min   : 0.0
+      max   : 1.0
+      v     : 0.5
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name  : nms_threshold
+      desc  : Non-Maximum suppresion area threshold ratio to merge proposals.
+      label : NMS Threshold
+      min   : 0.0
+      max   : 1.0
+      v     : 0.45
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name      : image_src
+      desc      : Image topic to be fed to the network for detection
+      label     : image_src
+      kind      : str
+      v         : /image_raw
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name     : network_definition_file
+      desc     : Configuration file defining the network
+      label    : 'network_definition (cfg)'
+      kind     : path
+      v        : $(echo $HOME)/darknet/cfg/yolo.cfg
+      cmd_param:
+        dash     : ''
+        delim    : ':='
+    - name     : pretrained_model_file
+      desc     : Pre-trained  model
+      label    : 'pre_trained_model (weights)'
+      kind     : path
+      v        : $(echo $HOME)/darknet/data/yolo.weights
+      cmd_param:
+        dash     : ''
+        delim    : ':='
+    - name      : gpu_device_id
+      desc      : gpu_device_id desc sample
+      label     : gpu_device_id
+      min       : 0
+      max       : 10
+      v         : 0
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name         : camera_id
+      desc         : camera_id desc sample
+      kind         : menu
+      label        : Camera ID
+      choices_type : str
+      v            : ''
+      cmd_param    :
+        dash         : ''
+        delim        : ':='
+
+  - name  : yolo3
+    vars  :
+    - name  : score_threshold
+      desc  : Detections with a confidence value larger than this value will be displayed.
+      label : Score Threshold
+      min   : 0.0
+      max   : 1.0
+      v     : 0.5
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name  : nms_threshold
+      desc  : Non-Maximum suppresion area threshold ratio to merge proposals.
+      label : NMS Threshold
+      min   : 0.0
+      max   : 1.0
+      v     : 0.45
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name      : image_src
+      desc      : Image topic to be fed to the network for detection
+      label     : image_src
+      kind      : str
+      v         : /image_raw
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name     : network_definition_file
+      desc     : Configuration file defining the network
+      label    : 'network_definition (cfg)'
+      kind     : path
+      v        : $(rospack find yolo3_detector)/darknet/cfg/yolov3.cfg
+      cmd_param:
+        dash     : ''
+        delim    : ':='
+    - name     : pretrained_model_file
+      desc     : Pre-trained  model
+      label    : 'pre_trained_model (weights)'
+      kind     : path
+      v        : $(rospack find yolo3_detector)/darknet/data/yolov3.weights
+      cmd_param:
+        dash     : ''
+        delim    : ':='
+    - name      : gpu_device_id
+      desc      : gpu_device_id desc sample
+      label     : gpu_device_id
+      min       : 0
+      max       : 10
+      v         : 0
+      cmd_param :
+        dash      : ''
+        delim     : ':='
+    - name         : camera_id
+      desc         : camera_id desc sample
+      kind         : menu
+      label        : Camera ID
+      choices_type : str
+      v            : ''
+      cmd_param    :
+        dash         : ''
+        delim        : ':='

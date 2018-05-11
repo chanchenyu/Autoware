@@ -1,5 +1,10 @@
 <div align="center"><img src="docs/images/autoware_logo_1.png" width="400"/></div>
 
+|Branch | Status |
+|-------|--------|
+|Master |[![Build Status](https://travis-ci.org/CPFL/Autoware.svg?branch=master)](https://travis-ci.org/CPFL/Autoware) |
+|Develop|[![Build Status](https://travis-ci.org/CPFL/Autoware.svg?branch=develop)](https://travis-ci.org/CPFL/Autoware)|
+
 # Autoware
 Open-source software for urban autonomous driving, maintained by [Tier IV](http://www.tier4.jp). The following functions are supported:
 
@@ -28,7 +33,7 @@ Autoware is protected by the BSD License. Please use it at your own discretion. 
 
 Free manuals can be found at [https://github.com/CPFL/Autoware-Manuals](https://github.com/CPFL/Autoware-Manuals). You are encouraged to contribute to the maintenance of these manuals. Thank you for your cooperation!
 
-See also [branching_model](https://github.com/CPFL/Autoware/blob/master/docs/en/branching_model.md) for tips on Autoware development, including the coding style and branching model.
+If you have a question please check the [Wiki](https://github.com/CPFL/Autoware/wiki), and the [FAQ](https://github.com/CPFL/Autoware/wiki/FAQ), [FAQ (JP)](https://github.com/CPFL/Autoware/wiki/FAQ(JP)).
 
 ## License
 
@@ -52,23 +57,21 @@ See also [branching_model](https://github.com/CPFL/Autoware/blob/master/docs/en/
 
 **Please use checkout a revision before 2015/OCT/21 if you want to use Autoware on ROS Hydro or Ubuntu 13.04, 13.10.**
 
-### Install dependencies for Ubuntu 14.04 Indigo
+### Install system dependencies for Ubuntu 14.04 Indigo
 
 ```
-% sudo apt-get install ros-indigo-desktop-full ros-indigo-nmea-msgs ros-indigo-nmea-navsat-driver ros-indigo-sound-play ros-indigo-jsk-visualization ros-indigo-grid-map ros-indigo-gps-common
-% sudo apt-get install ros-indigo-controller-manager ros-indigo-ros-control ros-indigo-ros-controllers ros-indigo-gazebo-ros-control ros-indigo-sicktoolbox ros-indigo-sicktoolbox-wrapper ros-indigo-joystick-drivers ros-indigo-novatel-span-driver ros-indigo-urg-node ros-indigo-image-view2
-% sudo apt-get install libnlopt-dev freeglut3-dev qtbase5-dev libqt5opengl5-dev libssh2-1-dev libarmadillo-dev libpcap-dev gksu libgl1-mesa-dev libglew-dev software-properties-common libyaml-cpp-dev python-flask python-requests
+% sudo apt-get install -y  python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin
 % sudo add-apt-repository ppa:mosquitto-dev/mosquitto-ppa
+% sudo apt-get update
 % sudo apt-get install libmosquitto-dev
 ```
 
 **NOTE: Please do not install ros-indigo-velodyne-pointcloud package. If it is already installed, please uninstall.**
 
-### Install dependencies for Ubuntu 16.04 Kinetic
+### Install system dependencies for Ubuntu 16.04 Kinetic
 ```
-% sudo apt-get install ros-kinetic-desktop-full ros-kinetic-nmea-msgs ros-kinetic-nmea-navsat-driver ros-kinetic-sound-play ros-kinetic-jsk-visualization ros-kinetic-grid-map ros-kinetic-gps-common
-% sudo apt-get install ros-kinetic-controller-manager ros-kinetic-ros-control ros-kinetic-ros-controllers ros-kinetic-gazebo-ros-control ros-kinetic-joystick-drivers ros-kinetic-urg-node ros-kinetic-image-view2
-% sudo apt-get install libnlopt-dev freeglut3-dev qtbase5-dev libqt5opengl5-dev libssh2-1-dev libarmadillo-dev libpcap-dev gksu libgl1-mesa-dev libglew-dev python-wxgtk3.0 software-properties-common libmosquitto-dev libyaml-cpp-dev python-flask python-requests
+% sudo apt-get update
+% sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin libmosquitto-dev
 ```
 
 **NOTE: Following packages are not supported in ROS Kinetic.**
@@ -78,14 +81,24 @@ See also [branching_model](https://github.com/CPFL/Autoware/blob/master/docs/en/
 
 ## How to Build
 
+1. Clone the repository
+
 ```
 $ cd $HOME
-$ git clone https://github.com/CPFL/Autoware.git
+$ git clone https://github.com/CPFL/Autoware.git --recurse-submodules
+```
+or if you already have a copy of the repo, run `$ git submodule update --init --recursive`.
+
+2. Initialize the workspace, let rosdep to install the missing dependencies and compile.
+ 
+```
 $ cd ~/Autoware/ros/src
 $ catkin_init_workspace
 $ cd ../
+$ rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
 $ ./catkin_make_release
 ```
+
 ###Caffe based object detectors
 CV based detectors RCNN and SSD nodes are not automatically built.
 
@@ -93,6 +106,7 @@ To build these nodes please follow the respective node's README
 [SSD](ros/src/computing/perception/detection/packages/cv_tracker/nodes/ssd/README.md)
 [RCNN](ros/src/computing/perception/detection/lib/image/librcnn/README.md)
 [Yolo2](ros/src/computing/perception/detection/packages/cv_tracker/nodes/yolo2/README.md)
+[Yolo3](ros/src/computing/perception/detection/packages/yolo3_detector/README.md)
 
 
 ## How to Start
@@ -117,7 +131,7 @@ GitFlow, the git branching model, is used in the Autoware repository.
   You can use the following command.  
   `$ git checkout -b hotfix/[your_branch_name] master`
 
-See [docs/en/branching_model.md](docs/en/branching_model.md)
+See also [branching_model](https://github.com/CPFL/Autoware/blob/master/docs/en/branching_model.md) for tips on Autoware development, including the coding style and branching model.
 
 More details [here](http://nvie.com/posts/a-successful-git-branching-model/)
 
@@ -183,6 +197,9 @@ More details [here](http://nvie.com/posts/a-successful-git-branching-model/)
 ### Detection with Yolo2
 [![Yolo2](http://img.youtube.com/vi/gG_ojWOmDO0/mqdefault.jpg)](https://youtu.be/gG_ojWOmDO0)
 
+### Detection with Yolo3
+[![Yolo v3 Autoware](https://img.youtube.com/vi/pO4vM4ehI98/0.jpg)](https://www.youtube.com/watch?v=pO4vM4ehI98)
+
 ### Detection with DPM
 [![DPM](http://img.youtube.com/vi/P_BFQNbudlg/mqdefault.jpg)](https://youtu.be/P_BFQNbudlg)
 
@@ -205,6 +222,12 @@ More details [here](http://nvie.com/posts/a-successful-git-branching-model/)
 [![Calibration Toolkit](http://img.youtube.com/vi/pfBmfgHf6zg/mqdefault.jpg)](https://www.youtube.com/watch?v=pfBmfgHf6zg)
 
 See [https://github.com/CPFL/Autoware/wiki/Calibration(EN)](https://github.com/CPFL/Autoware/wiki/Calibration(EN))
+
+### Camera-LiDAR Calibration
+See [Autoware Camera-LiDAR Calibration](ros/src/sensing/fusion/packages/autoware_camera_lidar_calibrator/README.md)
+
+### Multi-LiDAR Calibration
+See [Autoware Multi-LiDAR Calibration](ros/src/sensing/fusion/packages/multi_lidar_calibrator/README.md)
 
 ### Data Processor for Bag File
 [![Data Processor](http://img.youtube.com/vi/M38Obmy-3Ko/mqdefault.jpg)](https://youtu.be/M38Obmy-3Ko)
