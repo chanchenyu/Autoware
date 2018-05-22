@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package>
+  <name>utm</name>
+  <version>1.6.3</version>
+  <description>The utm package</description>
+  <maintainer email="izeki.tw@gmail.com">Yi-Ta Chuang</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <export>
+  </export>
+</package>
